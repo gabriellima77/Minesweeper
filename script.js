@@ -1,5 +1,7 @@
 const btns = document.querySelectorAll('button');
 const container = document.querySelector('#container');
+let interval;
+let time = [0, 0];
 let firstBlock;
 let size;
 let mines;
@@ -19,12 +21,58 @@ function changeDisplay(para){
 }
 
 function putFlag(e){
-    if(e.which === 3){
-        this.style.backgroundImage = 'url("https://www.flaticon.com/svg/static/icons/svg/608/608797.svg")';
-        this.style.backgroundSize = '50%';
-        this.style.backgroundRepeat = 'no-repeat';
-        this.style.backgroundPosition = 'center';
-        this.removeEventListener('click', click);
+    if(e.which === 3 && !this.classList.contains('open')){
+        if(this.classList.contains('flag')){
+            this.addEventListener('click', click);
+            this.classList.remove('flag');
+        }
+        else{
+            this.classList.add('flag');
+            this.removeEventListener('click', click);
+        }
+    }
+}
+
+function openRange(index, area){
+    let row = Math.floor(index / size[1]);
+    let column = index % size[0];
+    for(let i = row - 1; i < row + 2; i++){
+        for(let j = column - 1; j < column + 2; j++){
+            if(i >= 0 && i < size[1] && j >= 0 && j < size[0]){
+                if(!area[i * size[0] + j].classList.contains('flag')){
+                    area[i * size[0] + j].classList.add('open');
+                    let para = area[i * size[0] + j].children[0];
+                    changeDisplay(para);
+                    if(camp[i * size[0] + j] === 0){
+                        clickZero([i * size[0] + j]);
+                    }
+                    else if(camp[i * size[0] + j] === -1){
+                        isBomb();
+                    }
+                }
+            }
+        }
+    }
+}
+
+function checkFlag(tile){
+    let count = 0;
+    let number = tile.textContent
+    let area = Array.from(document.querySelectorAll('.tile'));
+    let index = area.indexOf(tile);
+    let row = Math.floor(index / size[1]);
+    let column = index % size[0];
+    for(let i = row - 1; i < row + 2; i++){
+        for(let j = column - 1; j < column + 2; j++){
+            if(area[i * size[0] + j]){
+                if(area[i * size[0] + j].classList.contains('flag')){
+                    count++;
+                }
+            }
+        }
+    }
+    if(count == number){
+        openRange(index, area);
     }
 }
 
@@ -37,29 +85,31 @@ function click(){
         firstBlock = this;
         putBomb(size[0] * size[1], mines);
     }
-    changeDisplay(para);
-    if(camp[index] === 0){
-        clickZero(index);
+    if(!this.classList.contains('open')){
+        changeDisplay(para);
+        if(camp[index] === 0){
+            clickZero(index);
+        }
+        else if(camp[index] === -1){
+            isBomb();
+        }
+        this.classList.add('open');
     }
-    else if(camp[index] === -1){
-        isBomb(index);
+    else{
+        checkFlag(this);
     }
-    this.classList.add('open');
 }
 
 
 function openArea(index){
     let tiles = document.querySelectorAll('.tile');
     if(index[0] < 0 || index[0] >= size[1] || index[1] < 0 || index[1] >= size[0]){
-        console.log(1);
         return;
     }
     if(tiles[index[0] * size[0] + index[1]].classList.contains('open')){
-        console.log(2);
         return;
     }
     if(camp[index[0] * size[0] + index[1]] > 0){
-        console.log(3);
         tiles[index[0] * size[0] + index[1]].classList.add('open');
         tiles[index[0] * size[0] + index[1]].children[0].style.display = 'initial';
         return;
@@ -93,15 +143,12 @@ function isBomb(){
         tile.removeEventListener('click', click);
         tile.addEventListener('mousedown', putFlag);
     });
-    
+    clearInterval(interval);
     let h1 = document.createElement('h1');
-    h1.style.position = 'absolute';
+    h1.classList.add('end');
     h1.textContent = 'You lose!';
     h1.style.width = `${container.offsetWidth}px`;
     h1.style.left = `${container.offsetLeft}`;
-    h1.style.top = '45vh';
-    h1.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
-    h1.style.textAlign = 'center';
     container.appendChild(h1);
 }
 
@@ -145,21 +192,33 @@ function putBomb(sizeCamp, numberMines){
     }
 }
 
-function startGame(){
-    let grid = this.firstChild.textContent.split('x');
+let paragraph = document.createElement('p');
+function timer(){
+    if(time[1] >= 59){
+        time[0]++;
+        time[1] = 0;
+    }
+    else{
+        time[1]++;
+    }
+    if(time[1] < 10 && time[0] < 10){
+        paragraph.textContent = `Time: 0${time[0]}:0${time[1]}`;
+    }
+    else if(time[0] < 10 && time[1] > 10){
+        paragraph.textContent = `Time: 0${time[0]}:${time[1]}`;
+    }
+    else if(time[0] > 10 && time[1] < 10){
+        paragraph.textContent = `Time: ${time[0]}:0${time[1]}`;
+    }
+    else{
+        paragraph.textContent = `Time: ${time[0]}:${time[1]}`;
+    }
+}
+
+function makeGrid(grid){
     let columns = '';
     let rows = '';
     let fontSize = '3rem';
-    grid = Array.from(grid);
-    let quantityMines = Array.from(this.lastChild.textContent).filter(number =>{
-        if(number.match(/[0-9]/g)){
-            return number;
-        }
-    });
-    quantityMines = +quantityMines.join('');
-    mines = quantityMines;
-    size = grid;
-    btns.forEach(btn => btn.style.display = 'none');
     container.style.display = 'grid';
     for(let i = 0; i < grid[0]; i++){
         columns += '1fr ';
@@ -187,4 +246,22 @@ function startGame(){
     }
     container.style.gridTemplateColumns = columns;
     container.style.gridTemplateRows = rows;
+}
+
+function startGame(){
+    let grid = this.firstChild.textContent.split('x');
+    grid = Array.from(grid);
+    let quantityMines = Array.from(this.lastChild.textContent).filter(number =>{
+        if(number.match(/[0-9]/g)){
+            return number;
+        }
+    });
+    quantityMines = +quantityMines.join('');
+    mines = quantityMines;
+    size = grid;
+    btns.forEach(btn => btn.style.display = 'none');
+    makeGrid(grid);
+    container.appendChild(paragraph);
+    paragraph.classList.add('timer');
+    interval = setInterval(timer, 1000);
 }

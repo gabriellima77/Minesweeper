@@ -84,3 +84,29 @@ button:hover {
 .open {
     background-color:  rgb(221, 221, 221);
 }
+
+.flag {
+    background-image: url("https://www.flaticon.com/svg/static/icons/svg/608/608797.svg");
+    background-size: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.timer {
+    display: inline-flex;
+    font-size: 1.5rem;
+    position: fixed;
+    top: 15vh;
+    left: 80vw;
+    align-content: center;
+    justify-content: center;
+    width: 170px;
+    height: 30px;
+}
+
+.end {
+    position: absolute;
+    top: 45vh;
+    background-color: rgba(255, 0, 0, 0.5);
+    text-align: center;
+}
