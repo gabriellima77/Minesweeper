@@ -34,13 +34,12 @@ function putFlag(e){
 }
 
 function openRange(index, area){
-    let row = Math.floor(index / size[1]);
+    let row = Math.floor(index / size[0]);
     let column = index % size[0];
     for(let i = row - 1; i < row + 2; i++){
         for(let j = column - 1; j < column + 2; j++){
             if(i >= 0 && i < size[1] && j >= 0 && j < size[0]){
                 if(!area[i * size[0] + j].classList.contains('flag')){
-                    area[i * size[0] + j].classList.add('open');
                     let para = area[i * size[0] + j].children[0];
                     changeDisplay(para);
                     if(camp[i * size[0] + j] === 0){
@@ -49,6 +48,7 @@ function openRange(index, area){
                     else if(camp[i * size[0] + j] === -1){
                         isBomb();
                     }
+                    area[i * size[0] + j].classList.add('open');
                 }
             }
         }
@@ -60,7 +60,7 @@ function checkFlag(tile){
     let number = tile.textContent
     let area = Array.from(document.querySelectorAll('.tile'));
     let index = area.indexOf(tile);
-    let row = Math.floor(index / size[1]);
+    let row = Math.floor(index / size[0]);
     let column = index % size[0];
     for(let i = row - 1; i < row + 2; i++){
         for(let j = column - 1; j < column + 2; j++){
@@ -83,6 +83,7 @@ function click(){
     if(isFirstClick){
         isFirstClick = false;
         firstBlock = this;
+        interval = setInterval(timer, 1000);
         putBomb(size[0] * size[1], mines);
     }
     if(!this.classList.contains('open')){
@@ -99,7 +100,6 @@ function click(){
         checkFlag(this);
     }
 }
-
 
 function openArea(index){
     let tiles = document.querySelectorAll('.tile');
@@ -141,7 +141,7 @@ function isBomb(){
     let tiles = Array.from(document.querySelectorAll('.tile'));
     tiles.forEach(tile => {
         tile.removeEventListener('click', click);
-        tile.addEventListener('mousedown', putFlag);
+        tile.removeEventListener('mousedown', putFlag);
     });
     clearInterval(interval);
     let h1 = document.createElement('h1');
@@ -242,6 +242,7 @@ function makeGrid(grid){
         tile.style.fontSize = fontSize;
         tile.addEventListener('click', click);
         tile.addEventListener('mousedown', putFlag);
+        tile.addEventListener('contextmenu', e => e.preventDefault());
         container.appendChild(tile);
     }
     container.style.gridTemplateColumns = columns;
@@ -263,5 +264,4 @@ function startGame(){
     makeGrid(grid);
     container.appendChild(paragraph);
     paragraph.classList.add('timer');
-    interval = setInterval(timer, 1000);
 }
