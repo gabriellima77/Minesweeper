@@ -64,7 +64,7 @@ function checkFlag(tile){
     let column = index % size[0];
     for(let i = row - 1; i < row + 2; i++){
         for(let j = column - 1; j < column + 2; j++){
-            if(area[i * size[0] + j]){
+            if(i >= 0 && i < size[1] && j >= 0 && j < size[0]){
                 if(area[i * size[0] + j].classList.contains('flag')){
                     count++;
                 }
