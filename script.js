@@ -186,7 +186,6 @@ function click(){
         interval = setInterval(timer, 1000);
         putBomb(size[0] * size[1], mines);
     }
-    getWinner();
     if(!this.classList.contains('open')){
         changeDisplay(para);
         if(camp[index] === 0){
@@ -200,6 +199,7 @@ function click(){
     else{
         checkFlag(this);
     }
+    getWinner();
 }
 
 function openArea(index){
