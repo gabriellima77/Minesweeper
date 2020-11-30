@@ -1,5 +1,7 @@
 const btns = document.querySelectorAll('button');
 const container = document.querySelector('#container');
+const body = document.querySelector('body');
+let flags = 0;
 let interval;
 let time = [0, 0];
 let firstBlock;
@@ -8,7 +10,77 @@ let mines;
 let isFirstClick = true;
 let camp = [];
 
-btns.forEach(btn => btn.addEventListener('click', startGame))
+btns.forEach(btn => btn.addEventListener('click', startGame));
+
+function removeEvents(){
+    let restart = document.querySelector('.restart');
+    restart.removeEventListener('click', putWindow);
+
+    let dificulty = document.querySelector('.dificulty');
+    dificulty.removeEventListener('click', changeDificulty);
+}
+
+function changeDificulty(){
+    container.style.display = 'flex';
+    let menu = document.querySelector('#menu');
+    menu.style.display = 'none';
+    let tiles = Array.from(document.querySelectorAll('.tile'));
+    tiles.forEach(tile => container.removeChild(tile));
+    removeEvents();
+    container.style.width =  '85vh';
+    container.style.height =  '85vh';
+    container.style.margin = 'auto 0';
+    btns.forEach(btn => btn.style.display = 'initial');
+}
+
+function restartGame(){
+    let tiles = Array.from(document.querySelectorAll('.tile'));
+    let window = document.querySelector('.window');
+    let numberFlags = document.querySelector('.flags');
+    tiles.forEach(tile => container.removeChild(tile));
+    isFirstClick = true;
+    camp = [];
+    makeGrid(size);
+    time = [0, 0];
+    flags = 0;
+    numberFlags.textContent = `${flags}/${mines}`;
+    window.style.display = 'none';
+}
+
+function putWindow(){
+    let window = document.querySelector('.window');
+    let yes = document.querySelector('.yes');
+    let no = document.querySelector('.no');
+    yes.addEventListener('click', restartGame);
+    no.onclick = () => window.style.display = 'none';
+    window.style.display = 'flex';
+}
+
+function getWinner(){
+    if(container.lastChild.tagName == 'H1'){
+        return;
+    }
+    let count = 0;
+    let tiles = document.querySelectorAll('.tile');
+    for(let i = 0; i < tiles.length; i++){
+        if(!tiles[i].classList.contains('open')){
+            count++;
+        }
+    }
+    if(count == mines){
+        tiles.forEach(tile => {
+            tile.removeEventListener('click', click);
+            tile.removeEventListener('mousedown', putFlag);
+        });
+        clearInterval(interval);
+        let h1 = document.createElement('h1');
+        h1.classList.add('won');
+        h1.textContent = 'You Won!';
+        h1.style.width = `${container.offsetWidth}px`;
+        h1.style.left = `${container.offsetLeft}px`;
+        container.appendChild(h1);
+    }
+} 
 
 function changeDisplay(para){
     if(para.textContent != 0){
@@ -21,12 +93,17 @@ function changeDisplay(para){
 }
 
 function putFlag(e){
+    let numberFlags = document.querySelector('.flags')
     if(e.which === 3 && !this.classList.contains('open')){
         if(this.classList.contains('flag')){
+            flags--;
+            numberFlags.textContent = `${flags}/${mines}`;
             this.addEventListener('click', click);
             this.classList.remove('flag');
         }
         else{
+            flags++;
+            numberFlags.textContent = `${flags}/${mines}`;
             this.classList.add('flag');
             this.removeEventListener('click', click);
         }
@@ -74,6 +151,7 @@ function checkFlag(tile){
     if(count == number){
         openRange(index, area);
     }
+    getWinner();
 }
 
 function click(){
@@ -86,6 +164,7 @@ function click(){
         interval = setInterval(timer, 1000);
         putBomb(size[0] * size[1], mines);
     }
+    getWinner();
     if(!this.classList.contains('open')){
         changeDisplay(para);
         if(camp[index] === 0){
@@ -110,11 +189,16 @@ function openArea(index){
         return;
     }
     if(camp[index[0] * size[0] + index[1]] > 0){
+        if(tiles[index[0] * size[0] + index[1]].classList.contains('flag')){
+            return;
+        }
         tiles[index[0] * size[0] + index[1]].classList.add('open');
         tiles[index[0] * size[0] + index[1]].children[0].style.display = 'initial';
         return;
     }
-    tiles[index[0] * size[0] + index[1]].classList.add('open');
+    if(!tiles[index[0] * size[0] + index[1]].classList.contains('flag')){
+        tiles[index[0] * size[0] + index[1]].classList.add('open');
+    }
 
     // X and Y
 
@@ -135,6 +219,7 @@ function clickZero(index){
     let i = Math.floor(index / size[0]);
     let j = index % size[0];
     openArea([i, j]);
+    getWinner();
 }
 
 function isBomb(){
@@ -148,7 +233,7 @@ function isBomb(){
     h1.classList.add('end');
     h1.textContent = 'You lose!';
     h1.style.width = `${container.offsetWidth}px`;
-    h1.style.left = `${container.offsetLeft}`;
+    h1.style.left = `${container.offsetLeft}px`;
     container.appendChild(h1);
 }
 
@@ -192,8 +277,8 @@ function putBomb(sizeCamp, numberMines){
     }
 }
 
-let paragraph = document.createElement('p');
 function timer(){
+    let paragraph = document.querySelectorAll('.timer');
     if(time[1] >= 59){
         time[0]++;
         time[1] = 0;
@@ -202,16 +287,16 @@ function timer(){
         time[1]++;
     }
     if(time[1] < 10 && time[0] < 10){
-        paragraph.textContent = `Time: 0${time[0]}:0${time[1]}`;
+        paragraph[1].textContent = `0${time[0]}:0${time[1]}`;
     }
     else if(time[0] < 10 && time[1] > 10){
-        paragraph.textContent = `Time: 0${time[0]}:${time[1]}`;
+        paragraph[1].textContent = `0${time[0]}:${time[1]}`;
     }
     else if(time[0] > 10 && time[1] < 10){
-        paragraph.textContent = `Time: ${time[0]}:0${time[1]}`;
+        paragraph[1].textContent = `${time[0]}:0${time[1]}`;
     }
     else{
-        paragraph.textContent = `Time: ${time[0]}:${time[1]}`;
+        paragraph[1].textContent = `${time[0]}:${time[1]}`;
     }
 }
 
@@ -228,6 +313,7 @@ function makeGrid(grid){
     }
     if(size[0] > size[1]){
         container.style.width = '80vw';
+        container.style.margin = 'auto 0 auto -16vw';
         fontSize = '1.5rem';
     }
     else if(size[0] == 16){
@@ -250,8 +336,18 @@ function makeGrid(grid){
 }
 
 function startGame(){
+    let restart = document.querySelector('.restart');
+    restart.addEventListener('click', putWindow);
+
+    let dificulty = document.querySelector('.dificulty');
+    dificulty.addEventListener('click', changeDificulty);
+
+    let menu = document.querySelector('#menu');
+    menu.style.display = 'flex';
+
     let grid = this.firstChild.textContent.split('x');
     grid = Array.from(grid);
+
     let quantityMines = Array.from(this.lastChild.textContent).filter(number =>{
         if(number.match(/[0-9]/g)){
             return number;
@@ -262,6 +358,6 @@ function startGame(){
     size = grid;
     btns.forEach(btn => btn.style.display = 'none');
     makeGrid(grid);
-    container.appendChild(paragraph);
-    paragraph.classList.add('timer');
+    let numberFlags = document.querySelector('.flags');
+    numberFlags.textContent = `${flags}/${mines}`;
 }

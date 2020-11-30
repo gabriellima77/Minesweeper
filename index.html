@@ -4,11 +4,32 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="style.css">
+        <link rel="icon" href="https://www.flaticon.com/svg/static/icons/svg/942/942381.svg">
         <title>Minesweeper</title>
     </head>
     <body>
+        <div class="window">
+            <div class="bar">Alert</div>
+            <p class="text">Do you want to reset the game?</p>
+            <div class="options">
+                <p class="yes">YES</p>
+                <p class="no">NO</p>
+            </div>
+        </div>
         <h1>Mine Sweeper</h1>
         <div id="container">
+            <div id="menu">
+                <div id="information">
+                    <div class="flag ui"></div>
+                    <p class="timer flags">0/0</p>
+                    <div class="clock"></div>
+                    <p class="timer">00:00</p>
+                </div>
+                <div id="buttons">
+                    <div class="btn restart">Restart</div>
+                    <div class="btn dificulty">Dificulty</div>
+                </div>
+            </div>
             <button type="button">8x8<br><span class="mines">10 mines</span></button>
             <button type="button">16x16<br><span class="mines">40 mines</span></button>
             <button type="button">30x16<br><span class="mines">99 mines</span></button>
