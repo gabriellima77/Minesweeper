@@ -4,7 +4,7 @@ const body = document.querySelector('body');
 let flags = 0;
 let interval;
 let time = [0, 0];
-let firstBlock;
+let firstBlock = undefined;
 let size;
 let mines;
 let isFirstClick = true;
@@ -12,28 +12,46 @@ let camp = [];
 
 btns.forEach(btn => btn.addEventListener('click', startGame));
 
-function removeEvents(){
+function reset(){
+    let menu = document.querySelector('#menu');
+    menu.style.display = 'none';
+
+    let tiles = Array.from(document.querySelectorAll('.tile'));
+    tiles.forEach(tile => container.removeChild(tile));
+
+    let h1 = container.lastChild;
+    container.removeChild(h1);
+
     let restart = document.querySelector('.restart');
     restart.removeEventListener('click', putWindow);
 
     let dificulty = document.querySelector('.dificulty');
     dificulty.removeEventListener('click', changeDificulty);
+
+    window.clearInterval(interval);
+
+    btns.forEach(btn => btn.style.display = 'initial');
+    isFirstClick = true;
+    camp = [];
+    time = [0, 0];
+    flags = 0;
 }
 
 function changeDificulty(){
+    reset();
+
     container.style.display = 'flex';
-    let menu = document.querySelector('#menu');
-    menu.style.display = 'none';
-    let tiles = Array.from(document.querySelectorAll('.tile'));
-    tiles.forEach(tile => container.removeChild(tile));
-    removeEvents();
     container.style.width =  '85vh';
     container.style.height =  '85vh';
     container.style.margin = 'auto 0';
-    btns.forEach(btn => btn.style.display = 'initial');
+
+    let timer = document.querySelectorAll('.timer');
+    timer[1].textContent = '00:00';
 }
 
 function restartGame(){
+    let h1 = container.lastChild;
+    container.removeChild(h1);
     let tiles = Array.from(document.querySelectorAll('.tile'));
     let window = document.querySelector('.window');
     let numberFlags = document.querySelector('.flags');
