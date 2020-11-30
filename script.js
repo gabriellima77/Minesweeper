@@ -4,7 +4,7 @@ const body = document.querySelector('body');
 let flags = 0;
 let interval;
 let time = [0, 0];
-let firstBlock = undefined;
+let firstBlock;
 let size;
 let mines;
 let isFirstClick = true;
@@ -13,14 +13,18 @@ let camp = [];
 btns.forEach(btn => btn.addEventListener('click', startGame));
 
 function reset(){
+    let items = Array.from(container.children);
+    items.forEach(item => {
+        if(item.classList.contains('won') || item.classList.contains('end')){
+            container.removeChild(item);
+        }
+    });
+    
     let menu = document.querySelector('#menu');
     menu.style.display = 'none';
 
     let tiles = Array.from(document.querySelectorAll('.tile'));
     tiles.forEach(tile => container.removeChild(tile));
-
-    let h1 = container.lastChild;
-    container.removeChild(h1);
 
     let restart = document.querySelector('.restart');
     restart.removeEventListener('click', putWindow);
