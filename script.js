@@ -271,7 +271,7 @@ function increaseNumber(row, column){
     }
 }
 
-function contBomb(){
+function countBomb(){
     for(let i = 0; i < size[1]; i++){
         for(let j = 0; j < size[0]; j++){
             if(camp[i * size[0] + j] !== -1){
@@ -293,7 +293,7 @@ function putBomb(sizeCamp, numberMines){
             camp[bombPlace] = -1;
         }
     }
-    contBomb();
+    countBomb();
     for(let i = 0; i < size[0] * size[1]; i++){
         tiles[i].children[0].textContent = camp[i];
     }

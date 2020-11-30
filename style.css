@@ -183,6 +183,7 @@ button:hover {
     position: absolute;
     top: 33vh;
     background-color: rgba(0, 0, 0, 0.4);
+    z-index: 2;
 }
 
 .bar {
